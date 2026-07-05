@@ -5,6 +5,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { exec } from 'child_process';
 
 dotenv.config();
 
@@ -143,11 +144,26 @@ io.on('connection', (socket) => {
   });
 });
 
+// GitHub Auto-Deploy Webhook
+app.post('/api/webhook', (req, res) => {
+  res.status(200).send('Deploy triggered');
+  console.log('GitHub Push detected! Pulling new code...');
+  
+  exec('git pull && npm run build && pm2 restart instrupy', (err, stdout, stderr) => {
+    if (err) {
+      console.error('Auto-deploy failed:', err);
+      return;
+    }
+    console.log('Deploy Output:', stdout);
+  });
+});
+
 // Send all other requests to the React app router (for client-side routing)
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
+// Starts on Port 80 (Standard Web Port)
 const PORT = process.env.PORT || 80;
 httpServer.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
