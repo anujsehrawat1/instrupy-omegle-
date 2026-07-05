@@ -557,6 +557,8 @@ export default function ChatView({ mode, interests, onBackToHome }: ChatViewProp
       strangerVideoRef.current.srcObject = null;
     }
     
+    remoteStreamRef.current = null;
+    setIsStrangerVideoReady(false);
     setSharedInterests([]);
 
     // Retrieve settings
