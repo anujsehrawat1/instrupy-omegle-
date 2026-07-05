@@ -273,6 +273,17 @@ export default function ChatView({ mode, interests, onBackToHome }: ChatViewProp
       setMessages(prev => {
         const msgs = [...prev];
         msgs.push({ id: Math.random().toString(), sender: 'system', text: "You're now chatting with a random stranger! Say hi!", timestamp: new Date() });
+        
+        if (data.sharedInterests && data.sharedInterests.length > 0) {
+           setSharedInterests(data.sharedInterests);
+           msgs.push({
+             id: Math.random().toString(),
+             sender: 'system',
+             text: `You both like ${data.sharedInterests.join(', ')}.`,
+             timestamp: new Date()
+           });
+        }
+
         if (data.partnerLocation && data.partnerLocation.countryName) {
            msgs.push({
              id: Math.random().toString(),

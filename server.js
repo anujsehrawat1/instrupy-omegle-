@@ -54,8 +54,36 @@ io.on('connection', (socket) => {
     const queue = mode === 'CHAT_VIDEO' ? waitingUsersVideo : waitingUsersText;
 
     if (queue.length > 0) {
-      // Find a match
-      const partner = queue.shift();
+      let partnerIndex = -1;
+      let sharedInterests = [];
+
+      // 1. Try to find a match with shared interests
+      if (interests && interests.length > 0) {
+        const possibleMatches = [];
+        queue.forEach((u, index) => {
+          if (u.interests && u.interests.length > 0) {
+            const common = u.interests.filter(i => interests.includes(i));
+            if (common.length > 0) {
+              possibleMatches.push({ index, common });
+            }
+          }
+        });
+
+        if (possibleMatches.length > 0) {
+          // Pick a random user from the interest matches
+          const randomMatch = possibleMatches[Math.floor(Math.random() * possibleMatches.length)];
+          partnerIndex = randomMatch.index;
+          sharedInterests = randomMatch.common;
+        }
+      }
+
+      // 2. Random Picker (If no interest match, pick ANY random available user)
+      if (partnerIndex === -1) {
+        partnerIndex = Math.floor(Math.random() * queue.length);
+      }
+
+      // Remove the matched partner from the queue
+      const partner = queue.splice(partnerIndex, 1)[0];
       
       const roomId = `room_${partner.id}_${socket.id}`;
       
@@ -65,11 +93,11 @@ io.on('connection', (socket) => {
       if (partnerSocket) {
         partnerSocket.join(roomId);
         
-        // Notify both that they are connected
-        io.to(socket.id).emit('connected_to_stranger', { roomId, partnerLocation: partner.location, isInitiator: true });
-        io.to(partnerSocket.id).emit('connected_to_stranger', { roomId, partnerLocation: location, isInitiator: false });
+        // Notify both that they are connected and send any shared interests
+        io.to(socket.id).emit('connected_to_stranger', { roomId, partnerLocation: partner.location, isInitiator: true, sharedInterests });
+        io.to(partnerSocket.id).emit('connected_to_stranger', { roomId, partnerLocation: location, isInitiator: false, sharedInterests });
       } else {
-        // Partner somehow disconnected while in queue, put current user in queue
+        // Partner somehow disconnected while in queue, put current user back in queue
         queue.push({ id: socket.id, interests, mode, location });
       }
     } else {
