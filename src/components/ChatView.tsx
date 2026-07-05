@@ -527,7 +527,7 @@ export default function ChatView({ mode, interests, onBackToHome }: ChatViewProp
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [skipState, isConnected, isConnecting, matchedPersona]);
 
-  const [hasMediaPermission, setHasMediaPermission] = useState(false);
+  const [hasMediaPermission, setHasMediaPermission] = useState(true);
 
   // Initialize a new connection
   const startConnecting = async () => {
@@ -859,7 +859,7 @@ export default function ChatView({ mode, interests, onBackToHome }: ChatViewProp
                 }
                 className={`bg-[#4a4a4a] rounded-lg overflow-hidden shadow-sm shrink-0 z-30 group ${
                   isMobile
-                    ? 'absolute top-4 right-4 w-24 aspect-[4/3] border border-slate-400 shadow-2xl'
+                    ? 'absolute top-4 right-4 w-24 aspect-[4/3] shadow-2xl'
                     : isTablet
                     ? 'relative h-full aspect-[4/3] border border-slate-300'
                     : 'relative w-full h-full md:h-auto border border-slate-300'
