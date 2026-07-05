@@ -177,7 +177,7 @@ app.post('/api/webhook', (req, res) => {
   res.status(200).send('Deploy triggered');
   console.log('GitHub Push detected! Pulling new code...');
   
-  exec('git pull && npm run build && pm2 restart instrupy', (err, stdout, stderr) => {
+  exec('git fetch && git reset --hard origin/main && git pull && npm run build && pm2 restart all', (err, stdout, stderr) => {
     if (err) {
       console.error('Auto-deploy failed:', err);
       return;
