@@ -1,0 +1,6 @@
+{
+  "name": "instrupy",
+  "description": "A classic, simple, box-style alternative to Omegle featuring interest-based text and video chat with simulated matches and responsive UI.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
