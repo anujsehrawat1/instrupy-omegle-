@@ -278,7 +278,7 @@ export default function ChatView({ mode, interests, onBackToHome }: ChatViewProp
            setSharedInterests(data.sharedInterests);
            msgs.push({
              id: Math.random().toString(),
-             sender: 'system',
+             sender: 'interests',
              text: `You both are interested in ${data.sharedInterests.join(', ')}.`,
              timestamp: new Date()
            });
@@ -928,6 +928,14 @@ export default function ChatView({ mode, interests, onBackToHome }: ChatViewProp
               if (msg.sender === 'system') {
                 return (
                   <div key={msg.id} className="text-xs text-slate-500 font-mono italic my-[1px]">
+                    {msg.text}
+                  </div>
+                );
+              }
+
+              if (msg.sender === 'interests') {
+                return (
+                  <div key={msg.id} className="text-sm text-slate-700 font-semibold my-1.5 font-sans">
                     {msg.text}
                   </div>
                 );
