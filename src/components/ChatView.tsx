@@ -857,7 +857,7 @@ export default function ChatView({ mode, interests, onBackToHome }: ChatViewProp
                     ? { height: `${videoBoxHeight}px` }
                     : undefined
                 }
-                className={`bg-[#4a4a4a] rounded-lg overflow-hidden shadow-sm shrink-0 z-10 group ${
+                className={`bg-[#4a4a4a] rounded-lg overflow-hidden shadow-sm shrink-0 z-30 group ${
                   isMobile
                     ? 'absolute top-4 right-4 w-24 aspect-[4/3] border border-slate-400 shadow-2xl'
                     : isTablet
