@@ -3,11 +3,19 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 app.use(cors());
+
+// Serve the compiled React static files from 'dist' folder
+app.use(express.static(path.join(__dirname, 'dist')));
 
 const httpServer = createServer(app);
 
@@ -135,7 +143,12 @@ io.on('connection', (socket) => {
   });
 });
 
-const PORT = process.env.PORT || 3001;
+// Send all other requests to the React app router (for client-side routing)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
+const PORT = process.env.PORT || 80;
 httpServer.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
