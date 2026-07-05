@@ -609,9 +609,6 @@ export default function ChatView({ mode, interests, onBackToHome }: ChatViewProp
   };
 
   useEffect(() => {
-    // Auto-start searching for a stranger as soon as the chat view opens
-    setTriggerAutoSkip(true);
-
     return () => {
       if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
       if (matchTimerRef.current) clearTimeout(matchTimerRef.current);
