@@ -279,7 +279,7 @@ export default function ChatView({ mode, interests, onBackToHome }: ChatViewProp
            msgs.push({
              id: Math.random().toString(),
              sender: 'system',
-             text: `You both like ${data.sharedInterests.join(', ')}.`,
+             text: `You both are interested in ${data.sharedInterests.join(', ')}.`,
              timestamp: new Date()
            });
         }
@@ -602,7 +602,7 @@ export default function ChatView({ mode, interests, onBackToHome }: ChatViewProp
     }
 
     if (socketRef.current) {
-      socketRef.current.emit('start_search', { mode, interests, location: currentLocation });
+      socketRef.current.emit('start_search', { mode, interests, strict, location: currentLocation });
     }
   };
 

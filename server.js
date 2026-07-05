@@ -35,8 +35,8 @@ io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
   socket.on('start_search', (data) => {
-    const { mode, interests, location } = data; // mode: 'CHAT_TEXT' | 'CHAT_VIDEO'
-    console.log(`User ${socket.id} started search for ${mode}`);
+    const { mode, interests, location, strict } = data; // mode: 'CHAT_TEXT' | 'CHAT_VIDEO'
+    console.log(`User ${socket.id} started search for ${mode} (Strict: ${strict})`);
 
     // If user is already in a waiting queue, remove them first
     waitingUsersText = waitingUsersText.filter(u => u.id !== socket.id);
@@ -52,17 +52,18 @@ io.on('connection', (socket) => {
     });
 
     const queue = mode === 'CHAT_VIDEO' ? waitingUsersVideo : waitingUsersText;
+    const myInterests = interests ? interests.map(i => i.toLowerCase().trim()) : [];
 
     if (queue.length > 0) {
       let partnerIndex = -1;
       let sharedInterests = [];
 
       // 1. Try to find a match with shared interests
-      if (interests && interests.length > 0) {
+      if (myInterests.length > 0) {
         const possibleMatches = [];
         queue.forEach((u, index) => {
           if (u.interests && u.interests.length > 0) {
-            const common = u.interests.filter(i => interests.includes(i));
+            const common = u.interests.filter(i => myInterests.includes(i));
             if (common.length > 0) {
               possibleMatches.push({ index, common });
             }
@@ -77,32 +78,47 @@ io.on('connection', (socket) => {
         }
       }
 
-      // 2. Random Picker (If no interest match, pick ANY random available user)
-      if (partnerIndex === -1) {
-        partnerIndex = Math.floor(Math.random() * queue.length);
+      // 2. Random Picker (If no interest match, and our strict is false)
+      if (partnerIndex === -1 && !strict) {
+        const validRandoms = [];
+        queue.forEach((u, index) => {
+          // Can only connect if the other user also doesn't have strict mode on
+          if (!u.strict) {
+            validRandoms.push(index);
+          }
+        });
+
+        if (validRandoms.length > 0) {
+          partnerIndex = validRandoms[Math.floor(Math.random() * validRandoms.length)];
+        }
       }
 
-      // Remove the matched partner from the queue
-      const partner = queue.splice(partnerIndex, 1)[0];
-      
-      const roomId = `room_${partner.id}_${socket.id}`;
-      
-      // Join both to the room
-      socket.join(roomId);
-      const partnerSocket = io.sockets.sockets.get(partner.id);
-      if (partnerSocket) {
-        partnerSocket.join(roomId);
+      if (partnerIndex !== -1) {
+        // Remove the matched partner from the queue
+        const partner = queue.splice(partnerIndex, 1)[0];
         
-        // Notify both that they are connected and send any shared interests
-        io.to(socket.id).emit('connected_to_stranger', { roomId, partnerLocation: partner.location, isInitiator: true, sharedInterests });
-        io.to(partnerSocket.id).emit('connected_to_stranger', { roomId, partnerLocation: location, isInitiator: false, sharedInterests });
+        const roomId = `room_${partner.id}_${socket.id}`;
+        
+        // Join both to the room
+        socket.join(roomId);
+        const partnerSocket = io.sockets.sockets.get(partner.id);
+        if (partnerSocket) {
+          partnerSocket.join(roomId);
+          
+          // Notify both that they are connected and send any shared interests
+          io.to(socket.id).emit('connected_to_stranger', { roomId, partnerLocation: partner.location, isInitiator: true, sharedInterests });
+          io.to(partnerSocket.id).emit('connected_to_stranger', { roomId, partnerLocation: location, isInitiator: false, sharedInterests });
+        } else {
+          // Partner somehow disconnected while in queue, put current user back in queue
+          queue.push({ id: socket.id, interests: myInterests, mode, location, strict });
+        }
       } else {
-        // Partner somehow disconnected while in queue, put current user back in queue
-        queue.push({ id: socket.id, interests, mode, location });
+        // No valid match found, wait in queue
+        queue.push({ id: socket.id, interests: myInterests, mode, location, strict });
       }
     } else {
-      // No match found, wait in queue
-      queue.push({ id: socket.id, interests, mode, location });
+      // No one in queue, wait in queue
+      queue.push({ id: socket.id, interests: myInterests, mode, location, strict });
     }
   });
 
