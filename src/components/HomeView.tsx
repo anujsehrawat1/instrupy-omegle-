@@ -152,12 +152,13 @@ export default function HomeView({ interests, setInterests, onStartChat }: HomeV
             {/* Additional Settings (Checkbox filter options) */}
             <div className="border-t border-slate-200 pt-4 mt-4 flex flex-col gap-2">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Matching & Sound Filters:</span>
-              <label className="flex items-start gap-2 text-xs text-slate-700 cursor-pointer select-none">
+              <label className={`flex items-start gap-2 text-xs text-slate-700 select-none ${interests.length === 0 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
                 <input
                   type="checkbox"
-                  checked={strictMatch}
+                  checked={strictMatch && interests.length > 0}
+                  disabled={interests.length === 0}
                   onChange={e => setStrictMatch(e.target.checked)}
-                  className="mt-0.5 accent-[#1a0dab]"
+                  className={`mt-0.5 accent-[#1a0dab] ${interests.length === 0 ? 'cursor-not-allowed' : ''}`}
                 />
                 <span><strong>Strict Match:</strong> Try harder to pair only with users sharing active interests (requires longer waiting times).</span>
               </label>

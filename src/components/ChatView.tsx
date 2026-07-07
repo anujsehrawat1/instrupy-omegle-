@@ -610,7 +610,7 @@ export default function ChatView({ mode, interests, onBackToHome }: ChatViewProp
     }
 
     if (socketRef.current) {
-      socketRef.current.emit('start_search', { mode, interests, strict, location: currentLocation });
+      socketRef.current.emit('start_search', { mode, interests, strict: strict && interests.length > 0, location: currentLocation });
     }
   };
 
